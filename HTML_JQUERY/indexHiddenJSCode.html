@@ -1,0 +1,141 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Index Hidden JS Code</title>
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+</head>
+
+<body>
+	<p class="w3-code">indexHiddenJS.html</p>
+	<pre style="width: 100%"><code class="w3-code">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Card Game&lt;/title&gt;
+	&lt;link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" /&gt;
+    &lt;script src="https://code.jquery.com/jquery-3.7.1.min.js"&gt;&lt;/script&gt;
+    &lt;link rel="stylesheet" href="css/App.css" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;h4 class="player"&gt;&lt;b&gt;CARD DECK (FRONTEND: HTML - JAVASCRIPT - JQUERY)&lt;/b&gt;&lt;/h4&gt;
+    
+    &lt;div class="player"&gt;
+        &lt;label for="players"&gt;Number of players:&lt;/label&gt;
+        &lt;input type="number" id="players" value="4" min="1"&gt;
+        &lt;button id="distribute"&gt;Distribute Cards&lt;/button&gt;
+    &lt;/div&gt;
+			
+    &lt;div id="output"&gt;&lt;/div&gt;
+    &lt;script src="js/App.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+		</code></pre>
+		
+		<p class="w3-code">js/App.js</p>
+		<pre style="width: 100%"><code class="w3-code">
+$(document).ready(function () {
+    // Initialize the deck of cards
+    const suitsSymbol = ['♠', '♥', '♦', '♣']; //Not in use - For testing purpose only
+    const suits = ['S', 'H', 'D', 'C'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'J', 'Q', 'K'];
+    const cardUnicodeMap = {
+        'S-A': '🂡', 'S-2': '🂢', 'S-3': '🂣', 'S-4': '🂤', 'S-5': '🂥', 'S-6': '🂦', 'S-7': '🂧', 'S-8': '🂨', 'S-9': '🂩', 'S-X': '🂪', 'S-J': '🂫', 'S-Q': '🂭', 'S-K': '🂮',
+        'H-A': '🂱', 'H-2': '🂲', 'H-3': '🂳', 'H-4': '🂴', 'H-5': '🂵', 'H-6': '🂶', 'H-7': '🂷', 'H-8': '🂸', 'H-9': '🂹', 'H-X': '🂺', 'H-J': '🂻', 'H-Q': '🂽', 'H-K': '🂾',
+        'D-A': '🃁', 'D-2': '🃂', 'D-3': '🃃', 'D-4': '🃄', 'D-5': '🃅', 'D-6': '🃆', 'D-7': '🃇', 'D-8': '🃈', 'D-9': '🃉', 'D-X': '🃊', 'D-J': '🃋', 'D-Q': '🃍', 'D-K': '🃎',
+        'C-A': '🃑', 'C-2': '🃒', 'C-3': '🃓', 'C-4': '🃔', 'C-5': '🃕', 'C-6': '🃖', 'C-7': '🃗', 'C-8': '🃘', 'C-9': '🃙', 'C-X': '🃚', 'C-J': '🃛', 'C-Q': '🃝', 'C-K': '🃞'
+    };			
+    let deck = [];
+
+    // Generate suits-values pair
+    suits.forEach(suit =&gt; {
+        values.forEach(value =&gt; {
+            pattern = `${suit}-${value}`;
+            
+            // Map cardUnicodeMap with the generated suits-values pair
+            for (const [key, value] of Object.entries(cardUnicodeMap)) {
+                if (key.includes(pattern) || String(value).includes(pattern)) {
+                    // Assign class name - 'cardblack' for Spades (or) Clubs &
+                    // class name - 'cardred' for Diamond (or) Hearts
+                    if(key.includes('S') || key.includes('C')) {
+                        deck.push(`${value}-cardblack`);
+                    } else {
+                        deck.push(`${value}-cardred`);
+                    }
+                }
+            }
+        });
+    });
+
+    // Shuffle the deck - Swapping the DeckCard Array
+    function shuffle(deckCard) {
+        //Loops through each card
+        for (let i = 0; i &lt; deckCard.length; i++) {
+            // picks the random number between 0 and length of the deck
+            const shuffleCard = Math.floor(Math.random() * (deckCard.length));
+
+            //swap the current with a random position
+            [ deckCard[i], deckCard[shuffleCard] ] = [ deckCard[shuffleCard], deckCard[i] ];
+        }
+    }
+
+    // Function to distribute cards to players
+    function distributeCards(numPlayers) {
+        $("#output").empty(); // Clear previous output
+        //Since the Card Deck only contains 52 cards, setting the maximum comparison value to 52
+        if (numPlayers &lt; 1 || numPlayers &gt; 52) {
+            alert("Number of players should be between 1 and 52.");
+            return;
+        }
+
+        shuffle(deck);
+
+        //Assign Empty Array of Cards to players
+        const players = Array.from({ length: numPlayers }, () =&gt; []);
+
+        // Populate Empty Array with Cards (Assigned to players based on Index)
+        for (let i = 0; i &lt; deck.length; i++) {
+            players[i % numPlayers].push(deck[i]);
+        }
+
+        // HTML Output - Display the Player # along with the assigned cards
+        players.forEach((player, index) =&gt; {
+            const playerCard = $("&lt;div&gt;").addClass("player w3-pale-green w3-bottombar w3-border-green w3-border w3-round-large")
+                .html(`&nbsp;&lt;strong&gt;Player ${index + 1}&lt;/strong&gt;&lt;br/&gt;`);
+            
+            // Assign Deck Card Array along with Class Name for each card 
+            player.forEach(card =&gt; {
+                const cardArray = card.split("-");
+                $("&lt;span&gt;").addClass(cardArray[1]).text(cardArray[0]).appendTo(playerCard);
+            });	
+            
+            $("#output").append(playerCard);
+        });
+    }
+
+    // Invoke distributeCards function which will perform the card shuffle / assignment logic
+    $("#distribute").click(function () {
+        const numPlayers = parseInt($("#players").val());
+        distributeCards(numPlayers);
+    });
+});
+		</code></pre>
+		
+		<p class="w3-code">css/App.css</p>
+		<pre style="width: 100%"><code class="w3-code">
+.player { margin: 15px 15px }
+.carddefault { display: inline-block; margin-right: 5px; font-size: 100px; color: #666; }
+.cardred { display: inline-block; margin: 5px 5px; font-size: 80px; color: #F00; }
+.cardblack { display: inline-block; margin: 5px 5px; font-size: 80px; color: #000; }
+		</code></pre>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/languages/go.min.js"></script>
+
+		<script>hljs.highlightAll();</script>
+	</body>
+</html>

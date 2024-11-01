@@ -1,0 +1,218 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Index Code</title>
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+</head>
+
+<body>
+	<p class="w3-code">index.html</p>
+	<pre style="width: 100%"><code class="w3-code">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;52-Card Game&lt;/title&gt;
+    &lt;link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"&gt;
+    &lt;link rel="stylesheet" href="css/App.css"&gt;
+
+    &lt;script src="https://code.jquery.com/jquery-3.7.1.min.js"&gt;&lt;/script&gt;
+    &lt;script src="https://unpkg.com/react/umd/react.development.js"&gt;&lt;/script&gt;
+    &lt;script src="https://unpkg.com/react-dom/umd/react-dom.development.js"&gt;&lt;/script&gt;
+    &lt;script src="https://unpkg.com/babel-standalone@6/babel.min.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h4 class="player"&gt;&lt;b&gt;CARD DECK (FRONTEND: HTML - REACT - JAVASCRIPT - JQUERY; BACKEND: PHP)&lt;/b&gt;&lt;/h4&gt;
+
+    &lt;!-- Container for the React app --&gt;
+    &lt;div id="output"&gt;&lt;/div&gt;
+
+    &lt;script src="js/App.js" type="text/babel"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+		</code></pre>
+		
+	<p class="w3-code">fetch_cards.php : Tested on Windows; For RedHat / Ubuntu Linux, php executable path (/bin/php) requires to be included along with Execute (x) permissions - chmod 755 </p>
+	<pre style="width: 100%"><code class="w3-code">
+&lt;?php
+
+//Database Configuration
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "card_game";
+
+//Create DB Connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+//Fetch all cards
+$sql = "SELECT suit, rank FROM cards";
+$result = $conn->query($sql);
+
+$cards = [];
+if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+        $cards[] = $row;
+    }
+} else {
+    echo json_encode(["error" => "No cards found"]);
+    exit;
+}
+
+// Return cards as JSON
+echo json_encode($cards);
+
+$conn->close();
+
+?&gt;
+		</code></pre>		
+		
+		<p class="w3-code">js/App.js</p>
+		<pre style="width: 100%"><code class="w3-code">
+const App = () =&gt; {
+    //Assign React State Hooks
+    const [numPlayers, setNumPlayers] = React.useState('');
+    const [distribution, setDistribution] = React.useState([]);
+    const [error, setError] = React.useState('');
+
+    const cardUnicodeMap = {
+        'S-A': '🂡', 'S-2': '🂢', 'S-3': '🂣', 'S-4': '🂤', 'S-5': '🂥', 'S-6': '🂦', 'S-7': '🂧', 'S-8': '🂨', 'S-9': '🂩', 'S-X': '🂪', 'S-J': '🂫', 'S-Q': '🂭', 'S-K': '🂮',
+        'H-A': '🂱', 'H-2': '🂲', 'H-3': '🂳', 'H-4': '🂴', 'H-5': '🂵', 'H-6': '🂶', 'H-7': '🂷', 'H-8': '🂸', 'H-9': '🂹', 'H-X': '🂺', 'H-J': '🂻', 'H-Q': '🂽', 'H-K': '🂾',
+        'D-A': '🃁', 'D-2': '🃂', 'D-3': '🃃', 'D-4': '🃄', 'D-5': '🃅', 'D-6': '🃆', 'D-7': '🃇', 'D-8': '🃈', 'D-9': '🃉', 'D-X': '🃊', 'D-J': '🃋', 'D-Q': '🃍', 'D-K': '🃎',
+        'C-A': '🃑', 'C-2': '🃒', 'C-3': '🃓', 'C-4': '🃔', 'C-5': '🃕', 'C-6': '🃖', 'C-7': '🃗', 'C-8': '🃘', 'C-9': '🃙', 'C-X': '🃚', 'C-J': '🃛', 'C-Q': '🃝', 'C-K': '🃞'
+    };
+
+    // Fetches the ordered deck of cards from the server
+    const fetchDeck = async() =&gt; {
+        try {
+            //Fetch Data from Server - jQuery Ajax Call
+            const cards = await $.ajax({
+                url: 'fetch_cards.php',
+                type: 'GET',
+                dataType: 'json'
+            });
+            return cards;
+        } catch (error) {
+            console.error("Error - Unable to fetch cards from server: " + error);
+        }
+    };
+
+    // Shuffle the deck - Swapping the DeckCard Array
+    const shuffleDeck = (deck) =&gt; {
+        //Loops through each card
+        for (let i = 0; i &lt; deck.length; i++) {            
+            // picks the random number between 0 and length of the deck
+            const shuffleCard = Math.floor(Math.random() * (i + 1));
+
+            //swap the current with a random position
+            [ deck[i], deck[shuffleCard] ] = [ deck[shuffleCard], deck[i] ];
+        }
+        return deck;
+    };
+
+    // Distributes the cards among the specified number of people
+    const distributeCards = (deck, numPlayers) =&gt; {
+        //Assign Empty Array of Cards to players
+        const players = Array.from({ length: numPlayers }, () =&gt; []);
+
+        // Populate Empty Array with Cards (Assigned to players based on Index)
+        for (let i = 0; i &lt; deck.length; i++) {
+            players[i % numPlayers].push(deck[i]);
+        }
+        return players.map(personCards =&gt; personCards.join(', '));
+    };
+
+    // Handles form submission
+    const handleSubmit = async (event) =&gt; {
+        event.preventDefault();
+        setError('');
+        setDistribution([]);
+
+        // Validate input
+        if (numPlayers &lt; 1 || numPlayers &gt; 52) {
+            alert("Number of players should be between 1 and 52.");
+            return;
+        }
+
+        // Fetch, shuffle, and distribute the deck
+        const cardDeck = await fetchDeck();
+
+        let deck = [];
+        cardDeck.forEach(function(card) {
+            var pattern = `${card.suit[0]}-${card.rank}`;
+
+            for (const [key, value] of Object.entries(cardUnicodeMap)) {
+                if (key.includes(pattern) || String(value).includes(pattern)) {
+                    if(key.includes('S') || key.includes('C')) {
+                        deck.push(`${value}-cardblack`);
+                    } else {
+                        deck.push(`${value}-cardred`);
+                    }
+                }
+            }
+        });
+
+        if (deck) {
+            const shuffledDeck = shuffleDeck(deck);
+            const distributedCards = distributeCards(shuffledDeck, parseInt(numPlayers));
+            setDistribution(distributedCards);
+        }
+    };
+
+    
+    return (
+        &lt;div&gt;
+            &lt;form onSubmit={handleSubmit}&gt;
+                &lt;label htmlFor="players"&gt;Number of players:&lt;/label&gt;&nbsp;
+                &lt;input type="number" id="numPlayers" value={numPlayers} min="1" onChange={(e) =&gt; setNumPlayers(e.target.value)} /&gt;&nbsp;
+                &lt;button id="distribute"&gt;Distribute Cards&lt;/button&gt;
+            &lt;/form&gt;
+
+            {error && &lt;p style={{ color: 'red' }}&gt;{error}&lt;/p&gt;}
+
+            &lt;div&gt;
+                {distribution.length &gt; 0 ? (
+                    distribution.map((cards, index) =&gt; (         
+                        &lt;div key={index} className="player w3-pale-green w3-bottombar w3-border-green w3-border w3-round-large"&gt;
+                            &lt;strong&gt;Player {index + 1}&lt;/strong&gt;: &lt;br/&gt; 
+                                {cards.split(', ').map((card, i) =&gt; {
+                                    var [cardName, className] = card.split('-');
+                                    return (
+                                        &lt;div key={i} className={className}&gt;{cardName}&lt;/div&gt;
+                                    );
+                                })}
+                        &lt;/div&gt;
+                    ))
+                ) : (
+                    &lt;p&gt;No cards distributed yet.&lt;/p&gt;
+                )}
+            &lt;/div&gt;
+        &lt;/div&gt;
+    );
+};
+
+// Render the App component
+const container = document.getElementById('output');
+const output = ReactDOM.createRoot(container);
+output.render(&lt;App /&gt;);
+
+		</code></pre>
+		
+		<p class="w3-code">css/App.css</p>
+		<pre style="width: 100%"><code class="w3-code">
+.player { margin: 15px 15px }
+.carddefault { display: inline-block; margin-right: 5px; font-size: 100px; color: #666; }
+.cardred { display: inline-block; margin: 5px 5px; font-size: 80px; color: #F00; }
+.cardblack { display: inline-block; margin: 5px 5px; font-size: 80px; color: #000; }
+		</code></pre>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/languages/go.min.js"></script>
+
+		<script>hljs.highlightAll();</script>
+	</body>
+</html>

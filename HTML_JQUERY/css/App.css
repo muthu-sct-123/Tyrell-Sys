@@ -1,0 +1,4 @@
+.player { margin: 15px 15px }
+.carddefault { display: inline-block; margin-right: 5px; font-size: 100px; color: #666; }
+.cardred { display: inline-block; margin: 5px 5px; font-size: 90px; color: #F00; }
+.cardblack { display: inline-block; margin: 5px 5px; font-size: 90px; color: #000; }
