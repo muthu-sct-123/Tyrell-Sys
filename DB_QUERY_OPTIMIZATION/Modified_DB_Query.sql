@@ -1,8 +1,8 @@
 /*
 
 Modification #1: DB Table Values are only extracted from 3 Tables - Jobs, JobCategories, JobTypes. So, INNER JOIN have been 
-moved to the top to Row# 30 and 31
-Modification #2: WHERE %Club Attendent% has been modified with IN at Row #42
+moved to the top to Row# 31 and 32
+Modification #2: WHERE %Club Attendent% has been modified with IN at Row #47
 Modification #3: Remove GROUP BY Clause as this is mostly used with aggregate fuctions like COUNT, SUM which is not being used here.
 
 I believe the above modifications could improve the query performance.
